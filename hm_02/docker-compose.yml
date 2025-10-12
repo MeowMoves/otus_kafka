@@ -1,0 +1,44 @@
+version: "3.8"
+
+services:
+  kafka1:
+    image: confluentinc/cp-kafka:7.5.1
+    container_name: kafka1
+    hostname: kafka1
+    ports:
+      - "9092:9092"
+      - "9093:9093"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka1:9093"
+      KAFKA_LISTENERS: SASL_PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: SASL_PLAINTEXT:SASL_PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_ADVERTISED_LISTENERS: SASL_PLAINTEXT://kafka1:9092
+      KAFKA_SASL_ENABLED_MECHANISMS: PLAIN
+      KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: PLAIN
+      KAFKA_INTER_BROKER_LISTENER_NAME: SASL_PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_AUTHORIZER_CLASS_NAME: org.apache.kafka.metadata.authorizer.StandardAuthorizer
+      KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND: "true"
+      KAFKA_LOG_RETENTION_HOURS: 168
+      CLUSTER_ID: "FhzDvisgSJ6aXveQT1hrKQ"
+      KAFKA_OPTS: "-Djava.security.auth.login.config=/etc/kafka/kafka_server_jaas.conf"
+    volumes:
+      - ./kafka/data/kafka1:/var/lib/kafka/data
+      - ./kafka/config/kafka:/etc/kafka 
+      - ./kafka/logs/kafka:/var/log/kafka
+      - ./kafka_server_jaas.conf:/etc/kafka/kafka_server_jaas.conf
+      - ./kafka_admin.properties:/etc/kafka/kafka_admin.properties
+      - ./kafka_user.properties:/etc/kafka/kafka_user.properties
+      - ./kafka_user2.properties:/etc/kafka/kafka_user2.properties
+      - ./kafka_user3.properties:/etc/kafka/kafka_user3.properties
+    networks:
+      - kafka-net  
+
+networks:
+  kafka-net:
+    driver: bridge
